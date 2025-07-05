@@ -3,11 +3,14 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  RequestTimeoutException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
+import { HashingProvider } from 'src/auth/provider/hashing.provider';
 import { Repository } from 'typeorm';
-import { createUserDto } from './dto/create.user.dto';
+import { CreateUserDto } from './dto/create.user.dto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { User } from './user.entity';
 
@@ -18,9 +21,11 @@ export class UsersService {
     private readonly authService: AuthService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @Inject(forwardRef(() => HashingProvider))
+    private readonly hashingProvider: HashingProvider,
   ) {}
 
-  //   users: createUserDto[] = [
+  //   users: CreateUserDto[] = [
   //     {
   //       id: 1,
   //       name: 'Fahim',
@@ -62,7 +67,7 @@ export class UsersService {
     return user;
   }
 
-  async createUser(userDto: createUserDto) {
+  async createUser(userDto: CreateUserDto) {
     const user = await this.usersRepository.findOne({
       where: { email: userDto.email },
     });
@@ -70,7 +75,10 @@ export class UsersService {
       throw new Error('User already exists');
     }
 
-    const newUser = this.usersRepository.create(userDto);
+    const newUser = this.usersRepository.create({
+      ...userDto,
+      password: await this.hashingProvider.hashPassword(userDto.password),
+    });
     return await this.usersRepository.save(newUser);
   }
 
@@ -88,5 +96,18 @@ export class UsersService {
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+  }
+
+  public async findUserByEmail(email: string) {
+    let user: User | null = null;
+    try {
+      user = await this.usersRepository.findOneBy({ email });
+    } catch (error) {
+      throw new RequestTimeoutException(`User with email ${email} not found`);
+    }
+    if (!user) {
+      throw new UnauthorizedException(`User with email ${email} not found`);
+    }
+    return user;
   }
 }
