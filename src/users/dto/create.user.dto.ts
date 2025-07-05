@@ -10,18 +10,18 @@ import {
 } from 'class-validator';
 
 export class createUserDto {
-  @IsNumber()
-  id: number;
   @IsString()
   @IsNotEmpty()
   name: string;
   @IsString()
   @MinLength(4)
   @MaxLength(8)
+  @IsNotEmpty()
   password: string;
   @IsNumber()
   age: number;
   @IsEmail()
+  @IsNotEmpty()
   email: string;
   @IsString()
   @IsOptional()

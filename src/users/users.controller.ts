@@ -1,14 +1,17 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { createUserDto } from './dto/create.user.dto';
 import { UpdateUserDto } from './dto/update.user.dto';
+import { User } from './user.entity';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -16,18 +19,18 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  getUsers(@Query() query: any) {
+  getAll(@Query() query: any) {
     // const usersService = new UsersService();
-    if (query.gender) {
-      return this.usersService
-        .getAllUsers()
-        .filter((u) => u.gender === query.gender);
-    }
+    // if (query.gender) {
+    //   return this.usersService
+    //     .getAllUsers()
+    //     .filter((u) => u.gender === query.gender);
+    // }
     return this.usersService.getAllUsers();
   }
 
   @Get(':id')
-  getUserById(@Param('id') id: any) {
+  getUsersById(@Param('id') id: any) {
     // console.log(param);
     // const usersService = new UsersService();
     return this.usersService.getUserById(+id);
@@ -35,26 +38,22 @@ export class UsersController {
 
   @Post()
   createUser(@Body() user: createUserDto) {
-    // const user = {
-    //   id: 3,
-    //   name: 'Rahim',
-    //   age: 20,
-    //   gender: 'male',
-    //   isMarried: false,
-    // };
     // const usersService = new UsersService();
     // usersService.createUser(user);
     console.log(user);
-    return 'User created successfully';
+    return this.usersService.createUser(user);
   }
 
   @Patch()
-  updateUser(@Body() user: UpdateUserDto) {
-    // const usersService = new UsersService();
-    // const existingUser = usersService.getUserById(user.id);
-    // if (!existingUser) {
-    //   return 'User not found';
-    // }
-    console.log(user);
+  updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserDto,
+  ): Promise<User> {
+    return this.usersService.update(id, dto);
+  }
+
+  @Delete(':id')
+  deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.usersService.delete(id);
   }
 }
