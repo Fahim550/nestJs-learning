@@ -9,6 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
 import { HashingProvider } from 'src/auth/provider/hashing.provider';
+import { Profile } from 'src/profile/profile.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create.user.dto';
 import { UpdateUserDto } from './dto/update.user.dto';
@@ -21,42 +22,18 @@ export class UsersService {
     private readonly authService: AuthService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Profile)
+    private readonly profileRepository: Repository<Profile>,
     @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
   ) {}
 
-  //   users: CreateUserDto[] = [
-  //     {
-  //       id: 1,
-  //       name: 'Fahim',
-  //       email: 'fahim123@gmail.com',
-  //       password: '123456',
-  //       age: 21,
-  //       gender: 'male',
-  //       isMarried: false,
-  //     },
-  //     {
-  //       id: 2,
-  //       name: 'Kahim',
-  //       email: 'fahim456@gmail.com',
-  //       password: '123456',
-  //       age: 25,
-  //       gender: 'male',
-  //       isMarried: false,
-  //     },
-  //     {
-  //       id: 3,
-  //       name: 'furi',
-  //       age: 25,
-  //       email: 'furi789@gmail.com',
-  //       password: '123456',
-  //       gender: 'female',
-  //       isMarried: false,
-  //     },
-  //   ];
-
   async getAllUsers() {
-    return this.usersRepository.find();
+    return this.usersRepository.find({
+      relations: {
+        profile: true,
+      },
+    });
   }
 
   async getUserById(id: number): Promise<User> {
@@ -68,18 +45,34 @@ export class UsersService {
   }
 
   async createUser(userDto: CreateUserDto) {
-    const user = await this.usersRepository.findOne({
-      where: { email: userDto.email },
-    });
-    if (user) {
-      throw new Error('User already exists');
-    }
-
-    const newUser = this.usersRepository.create({
+    // create a profile and save it
+    // userDto.profile = userDto.profile ?? {};
+    // const profile = this.profileRepository.create(userDto?.profile);
+    // await this.profileRepository.save(profile);
+    // create user object
+    const profile = this.profileRepository.create({ ...userDto.profile });
+    // const { profile, ...userData } = userDto;
+    const user = this.usersRepository.create({
       ...userDto,
       password: await this.hashingProvider.hashPassword(userDto.password),
+      profile,
     });
-    return await this.usersRepository.save(newUser);
+    // set the profile to the user
+    // user.profile = profile;
+    // save the user
+    return await this.usersRepository.save(user);
+    // const user = await this.usersRepository.findOne({
+    //   where: { email: userDto.email },
+    // });
+    // if (user) {
+    //   throw new Error('User already exists');
+    // }
+
+    // const newUser = this.usersRepository.create({
+    //   ...userDto,
+    //   password: await this.hashingProvider.hashPassword(userDto.password),
+    // });
+    // return await this.usersRepository.save(newUser);
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<User> {
@@ -91,11 +84,29 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async delete(id: number): Promise<void> {
-    const result = await this.usersRepository.delete({ id });
-    if (result.affected === 0) {
+  async delete(id: number) {
+    // find the user by id
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
+    // console.log(user);
+    // console.log('profile', user?.profile);
+    if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+    if (user) {
+      await this.usersRepository.delete(id);
+    }
+    if (user?.profile) {
+      await this.profileRepository.delete(user?.profile?.id);
+    } else {
+      console.log('User has no profile');
+    }
+
+    return {
+      delete: true,
+    };
   }
 
   public async findUserByEmail(email: string) {
@@ -109,5 +120,9 @@ export class UsersService {
       throw new UnauthorizedException(`User with email ${email} not found`);
     }
     return user;
+  }
+
+  public async findUserById(id: number) {
+    return await this.usersRepository.findOneBy({ id });
   }
 }

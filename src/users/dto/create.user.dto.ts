@@ -1,31 +1,28 @@
+import { Type } from 'class-transformer';
 import {
-  IsBoolean,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { ProfileDto } from 'src/profile/dto/create-profile.dto';
 
 export class CreateUserDto {
   @IsString()
-  @IsNotEmpty()
-  name: string;
-  @IsString()
   @MinLength(4)
-  @MaxLength(8)
+  @MaxLength(15)
   @IsNotEmpty()
   password: string;
-  @IsNumber()
-  age: number;
+
   @IsEmail()
   @IsNotEmpty()
   email: string;
-  @IsString()
+
   @IsOptional()
-  gender?: string;
-  @IsBoolean()
-  isMarried?: boolean;
+  @ValidateNested()
+  @Type(() => ProfileDto)
+  profile?: ProfileDto | null;
 }

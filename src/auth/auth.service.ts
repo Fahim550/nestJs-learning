@@ -68,6 +68,6 @@ export class AuthService {
     if (!user) {
       return 'Signup failed';
     }
-    return `User ${user?.name} created successfully`;
+    return `User  created successfully`;
   }
 }

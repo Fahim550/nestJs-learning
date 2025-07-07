@@ -1,58 +1,55 @@
-import { Profile } from 'src/profile/profile.entity';
 import { Review } from 'src/reviews/reviews.entity';
-import { Tweet } from 'src/tweet/tweet.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class Product {
   @PrimaryGeneratedColumn()
   id: number;
+
   @Column({
     type: 'varchar',
     length: 100,
     unique: true,
     nullable: false,
   })
-  email: string;
+  title: string;
   @Column({
-    type: 'varchar',
-    length: 100,
+    type: 'text',
     nullable: false,
   })
-  password: string;
-
-  @OneToOne(() => Profile, (profile) => profile.user, {
-    cascade: ['insert', 'remove'],
+  description: string;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: false,
   })
-  @JoinColumn()
-  profile?: Profile;
+  price: number;
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  imageUrl?: string;
 
-  @OneToMany(() => Tweet, (tweet) => tweet.user)
-  tweets: Tweet[];
-
-  @OneToMany(() => Review, (review) => review.user)
+  @OneToMany(() => Review, (review) => review.product)
   reviews: Review[];
 
   @CreateDateColumn({
     type: 'timestamp',
   })
   createdAt: Date;
-
   @UpdateDateColumn({
     type: 'timestamp',
   })
   updatedAt: Date;
-
   @DeleteDateColumn({
     type: 'timestamp',
   })

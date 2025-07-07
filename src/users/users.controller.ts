@@ -8,7 +8,9 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthorizeGuard } from 'src/auth/guards/authorize.guard';
 import { CreateUserDto } from './dto/create.user.dto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { User } from './user.entity';
@@ -29,6 +31,7 @@ export class UsersController {
     return this.usersService.getAllUsers();
   }
 
+  @UseGuards(AuthorizeGuard)
   @Get(':id')
   getUsersById(@Param('id') id: any) {
     // console.log(param);
@@ -53,7 +56,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.delete(id);
   }
 }
