@@ -7,31 +7,22 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
-  UseGuards,
 } from '@nestjs/common';
-import { AuthorizeGuard } from 'src/auth/guards/authorize.guard';
 import { CreateUserDto } from './dto/create.user.dto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
 @Controller('users')
+// @UseGuards(AuthorizeGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  getAll(@Query() query: any) {
-    // const usersService = new UsersService();
-    // if (query.gender) {
-    //   return this.usersService
-    //     .getAllUsers()
-    //     .filter((u) => u.gender === query.gender);
-    // }
+  getAll() {
     return this.usersService.getAllUsers();
   }
 
-  @UseGuards(AuthorizeGuard)
   @Get(':id')
   getUsersById(@Param('id') id: any) {
     // console.log(param);

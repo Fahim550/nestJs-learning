@@ -58,7 +58,6 @@ export class UsersService {
       profile,
     });
     // set the profile to the user
-    // user.profile = profile;
     // save the user
     return await this.usersRepository.save(user);
     // const user = await this.usersRepository.findOne({
@@ -90,8 +89,6 @@ export class UsersService {
       where: { id },
       relations: ['profile'],
     });
-    // console.log(user);
-    // console.log('profile', user?.profile);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -103,7 +100,6 @@ export class UsersService {
     } else {
       console.log('User has no profile');
     }
-
     return {
       delete: true,
     };

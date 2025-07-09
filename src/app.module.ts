@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import authConfig from './auth/config/auth.config.ts';
+import { AuthorizeGuard } from './auth/guards/authorize.guard';
 import { ProductsModule } from './products/products.module';
 import { ProfileModule } from './profile/profile.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -38,8 +41,18 @@ import { UsersService } from './users/users.service';
     TweetModule,
     ReviewsModule,
     ProductsModule,
+    JwtModule,
+    ConfigModule.forFeature(authConfig),
+    JwtModule.registerAsync(authConfig.asProvider()),
   ],
   controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  providers: [
+    AppService,
+    UsersService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthorizeGuard,
+    },
+  ],
 })
 export class AppModule {}

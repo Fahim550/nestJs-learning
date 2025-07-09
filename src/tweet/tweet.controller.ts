@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Post,
 } from '@nestjs/common';
+import { ActiceUser } from 'src/auth/decorators/active.user.decorator';
 import { CreateTweetDto } from './dto/create-tweet.dto';
 import { TweetService } from './tweet.service';
 
@@ -19,8 +20,12 @@ export class TweetController {
   // }
 
   @Post()
-  public async createTweet(@Body() createTweetDto: CreateTweetDto) {
+  public async createTweet(
+    @Body() createTweetDto: CreateTweetDto,
+    @ActiceUser() user,
+  ) {
     return await this.tweetService.create(createTweetDto);
+    // console.log(user);
   }
 
   @Get(':id')

@@ -5,6 +5,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import authConfig from './config/auth.config.ts';
+import { AuthorizeGuard } from './guards/authorize.guard';
 import { BcryptProvider } from './provider/bcrypt.provider';
 import { HashingProvider } from './provider/hashing.provider';
 
@@ -17,11 +18,12 @@ import { HashingProvider } from './provider/hashing.provider';
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthorizeGuard,
     {
       provide: HashingProvider,
       useClass: BcryptProvider,
     },
   ],
-  exports: [AuthModule, AuthService, HashingProvider],
+  exports: [AuthModule, AuthService, HashingProvider, AuthorizeGuard],
 })
 export class AuthModule {}
