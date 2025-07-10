@@ -1,10 +1,4 @@
-import {
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
@@ -21,8 +15,4 @@ export class CreateProductDto {
 
   @IsOptional()
   imageUrl?: string;
-
-  @IsNotEmpty()
-  @IsInt()
-  productId: number;
 }

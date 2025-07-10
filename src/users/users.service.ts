@@ -75,11 +75,23 @@ export class UsersService {
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ id });
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
     Object.assign(user, dto);
+    if (dto.profile && user.profile) {
+      Object.assign(user.profile, dto.profile);
+    }
+
+    if (dto.profile && user.profile) {
+      Object.assign(user.profile, dto.profile);
+    }
+
     return this.usersRepository.save(user);
   }
 
