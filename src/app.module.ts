@@ -29,6 +29,8 @@ import { UsersService } from './users/users.service';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         // entities: [User],
+        ssl: { rejectUnauthorized: false },
+        extra: { ssl: { rejectUnauthorized: false } },
         autoLoadEntities: true,
         synchronize: true,
       }),
